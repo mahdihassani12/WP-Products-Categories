@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mim Product Categories
  * Description: A customizable responsive WooCommerce product categories widget for Elementor.
- * Version: 1.0.1
+ * Version: 1.1.1
  * Author: Mim
  * Text Domain: mim-product-categories
  * Requires Plugins: elementor, woocommerce
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MIM_PC_VERSION', '1.0.1' );
+define( 'MIM_PC_VERSION', '1.1.1' );
 define( 'MIM_PC_FILE', __FILE__ );
 define( 'MIM_PC_URL', plugin_dir_url( __FILE__ ) );
 
@@ -41,17 +41,33 @@ function mim_pc_boot() {
 	}
 
 	add_action( 'wp_enqueue_scripts', 'mim_pc_register_assets' );
-	add_action( 'elementor/frontend/after_register_styles', 'mim_pc_register_assets' );
+	add_action( 'elementor/frontend/after_register_styles', 'mim_pc_register_style' );
+	add_action( 'elementor/frontend/after_register_scripts', 'mim_pc_register_script' );
 	add_action( 'elementor/widgets/register', 'mim_pc_register_widget' );
 }
 add_action( 'plugins_loaded', 'mim_pc_boot' );
 
 function mim_pc_register_assets() {
+	mim_pc_register_style();
+	mim_pc_register_script();
+}
+
+function mim_pc_register_style() {
 	wp_register_style(
 		'mim-product-categories',
 		MIM_PC_URL . 'assets/css/mim-product-categories.css',
 		array(),
 		MIM_PC_VERSION
+	);
+}
+
+function mim_pc_register_script() {
+	wp_register_script(
+		'mim-product-categories-carousel',
+		MIM_PC_URL . 'assets/js/mim-product-categories-carousel.js',
+		array( 'elementor-frontend' ),
+		MIM_PC_VERSION,
+		true
 	);
 }
 

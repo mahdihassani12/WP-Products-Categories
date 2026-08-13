@@ -152,6 +152,15 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$this->end_controls_section();
 
 		$this->start_controls_section( 'layout_section', array( 'label' => esc_html__( 'Layout', 'mim-product-categories' ) ) );
+		$this->add_control( 'layout_type', array(
+			'label' => esc_html__( 'Layout Type', 'mim-product-categories' ),
+			'type' => \Elementor\Controls_Manager::SELECT,
+			'default' => 'grid',
+			'options' => array(
+				'grid' => esc_html__( 'Grid', 'mim-product-categories' ),
+				'carousel' => esc_html__( 'Carousel', 'mim-product-categories' ),
+			),
+		) );
 		$this->add_responsive_control( 'columns', array(
 			'label' => esc_html__( 'Columns', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::SELECT,
@@ -160,6 +169,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'mobile_default' => '2',
 			'options' => array( '1'=>'1', '2'=>'2', '3'=>'3', '4'=>'4', '5'=>'5', '6'=>'6', '7'=>'7', '8'=>'8', '9'=>'9', '10'=>'10', '11'=>'11', '12'=>'12' ),
 			'selectors' => array( '{{WRAPPER}} .mim-pc-grid' => 'grid-template-columns: repeat({{VALUE}}, minmax(0, 1fr));' ),
+			'condition' => array( 'layout_type' => 'grid' ),
 		) );
 		$this->add_responsive_control( 'column_gap', array(
 			'label' => esc_html__( 'Column Gap', 'mim-product-categories' ),
@@ -167,6 +177,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'range' => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
 			'default' => array( 'size' => 16, 'unit' => 'px' ),
 			'selectors' => array( '{{WRAPPER}} .mim-pc-grid' => 'column-gap: {{SIZE}}{{UNIT}};' ),
+			'condition' => array( 'layout_type' => 'grid' ),
 		) );
 		$this->add_responsive_control( 'row_gap', array(
 			'label' => esc_html__( 'Row Gap', 'mim-product-categories' ),
@@ -174,11 +185,79 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'range' => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
 			'default' => array( 'size' => 10, 'unit' => 'px' ),
 			'selectors' => array( '{{WRAPPER}} .mim-pc-grid' => 'row-gap: {{SIZE}}{{UNIT}};' ),
+			'condition' => array( 'layout_type' => 'grid' ),
 		) );
 		$this->end_controls_section();
 
+		$this->register_carousel_controls();
+		$this->register_carousel_styles();
+
 		$this->register_header_styles();
 		$this->register_card_styles();
+	}
+
+	private function register_carousel_controls() {
+		$condition = array( 'layout_type' => 'carousel' );
+		$this->start_controls_section( 'carousel_section', array( 'label' => esc_html__( 'Carousel', 'mim-product-categories' ), 'condition' => $condition ) );
+		$this->add_responsive_control( 'slides_visible', array(
+			'label' => esc_html__( 'Slides Visible', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER,
+			'desktop_default' => 6, 'tablet_default' => 4, 'mobile_default' => 2, 'min' => 1, 'max' => 12,
+		) );
+		$this->add_control( 'slides_to_scroll', array( 'label' => esc_html__( 'Slides to Scroll', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 1, 'min' => 1, 'max' => 12 ) );
+		$this->add_responsive_control( 'carousel_space', array(
+			'label' => esc_html__( 'Space Between Slides', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER,
+			'range' => array( 'px' => array( 'min' => 0, 'max' => 100 ) ), 'default' => array( 'size' => 16, 'unit' => 'px' ),
+		) );
+		$this->add_control( 'carousel_speed', array( 'label' => esc_html__( 'Carousel Speed (ms)', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 500, 'min' => 100, 'max' => 5000, 'step' => 50 ) );
+		$this->add_control( 'autoplay', array( 'label' => esc_html__( 'Autoplay', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => '' ) );
+		$this->add_control( 'autoplay_delay', array( 'label' => esc_html__( 'Autoplay Delay (ms)', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 3000, 'min' => 500, 'max' => 20000, 'step' => 100, 'condition' => array( 'layout_type' => 'carousel', 'autoplay' => 'yes' ) ) );
+		$this->add_control( 'pause_on_hover', array( 'label' => esc_html__( 'Pause Autoplay on Hover', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes', 'condition' => array( 'layout_type' => 'carousel', 'autoplay' => 'yes' ) ) );
+		$switchers = array(
+			'infinite_loop' => array( 'Infinite Loop', 'yes' ), 'center_mode' => array( 'Center Mode', '' ),
+			'show_navigation' => array( 'Navigation Arrows', 'yes' ), 'show_pagination' => array( 'Pagination Dots', 'yes' ),
+			'allow_drag' => array( 'Touch and Mouse Dragging', 'yes' ), 'free_mode' => array( 'Free Mode', '' ),
+			'auto_height' => array( 'Auto Height', '' ),
+		);
+		foreach ( $switchers as $name => $control ) {
+			$this->add_control( $name, array( 'label' => esc_html__( $control[0], 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => $control[1] ) );
+		}
+		$this->add_control( 'carousel_direction', array(
+			'label' => esc_html__( 'Direction', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SELECT, 'default' => 'default',
+			'options' => array( 'default' => esc_html__( 'Site Default', 'mim-product-categories' ), 'ltr' => esc_html__( 'Left to Right', 'mim-product-categories' ), 'rtl' => esc_html__( 'Right to Left', 'mim-product-categories' ) ),
+		) );
+		$this->add_control( 'tablet_breakpoint', array( 'label' => esc_html__( 'Tablet Breakpoint (px)', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 1024, 'min' => 481, 'max' => 1600 ) );
+		$this->add_control( 'mobile_breakpoint', array( 'label' => esc_html__( 'Mobile Breakpoint (px)', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::NUMBER, 'default' => 767, 'min' => 320, 'max' => 1200 ) );
+		$this->end_controls_section();
+	}
+
+	private function register_carousel_styles() {
+		$this->start_controls_section( 'navigation_style', array( 'label' => esc_html__( 'Carousel Navigation', 'mim-product-categories' ), 'tab' => \Elementor\Controls_Manager::TAB_STYLE, 'condition' => array( 'layout_type' => 'carousel', 'show_navigation' => 'yes' ) ) );
+		$this->add_control( 'previous_icon', array( 'label' => esc_html__( 'Previous Arrow Icon', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::ICONS, 'default' => array( 'value' => 'fas fa-chevron-left', 'library' => 'fa-solid' ) ) );
+		$this->add_control( 'next_icon', array( 'label' => esc_html__( 'Next Arrow Icon', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::ICONS, 'default' => array( 'value' => 'fas fa-chevron-right', 'library' => 'fa-solid' ) ) );
+		$this->add_responsive_control( 'nav_size', array( 'label' => esc_html__( 'Arrow Size', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 8, 'max' => 60 ) ), 'default' => array( 'size' => 16, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => 'font-size:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'nav_color', array( 'label' => esc_html__( 'Arrow Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#3f5b92', 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => 'color:{{VALUE}};' ) ) );
+		$this->add_control( 'nav_hover_color', array( 'label' => esc_html__( 'Arrow Hover Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .mim-pc-nav:hover' => 'color:{{VALUE}};' ) ) );
+		$this->add_control( 'nav_background', array( 'label' => esc_html__( 'Arrow Background', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => 'background-color:{{VALUE}};' ) ) );
+		$this->add_control( 'nav_hover_background', array( 'label' => esc_html__( 'Arrow Hover Background', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .mim-pc-nav:hover' => 'background-color:{{VALUE}};' ) ) );
+		$this->add_group_control( \Elementor\Group_Control_Border::get_type(), array( 'name' => 'nav_border', 'selector' => '{{WRAPPER}} .mim-pc-nav' ) );
+		$this->add_control( 'nav_radius', array( 'label' => esc_html__( 'Arrow Border Radius', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', '%' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => 'border-radius:{{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		foreach ( array( 'nav_width' => 'Arrow Width', 'nav_height' => 'Arrow Height' ) as $name => $label ) {
+			$property = 'nav_width' === $name ? 'width' : 'height';
+			$this->add_responsive_control( $name, array( 'label' => esc_html__( $label, 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 20, 'max' => 100 ) ), 'default' => array( 'size' => 40, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => $property . ':{{SIZE}}{{UNIT}};' ) ) );
+		}
+		$this->add_responsive_control( 'nav_horizontal', array( 'label' => esc_html__( 'Arrow Horizontal Position', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => -100, 'max' => 100 ) ), 'default' => array( 'size' => 8, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-prev' => 'inset-inline-start:{{SIZE}}{{UNIT}};', '{{WRAPPER}} .mim-pc-next' => 'inset-inline-end:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'nav_vertical', array( 'label' => esc_html__( 'Arrow Vertical Position', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( '%' => array( 'min' => 0, 'max' => 100 ) ), 'default' => array( 'size' => 50, 'unit' => '%' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-nav' => 'top:{{SIZE}}{{UNIT}};' ) ) );
+		$this->end_controls_section();
+
+		$this->start_controls_section( 'pagination_style', array( 'label' => esc_html__( 'Carousel Pagination', 'mim-product-categories' ), 'tab' => \Elementor\Controls_Manager::TAB_STYLE, 'condition' => array( 'layout_type' => 'carousel', 'show_pagination' => 'yes' ) ) );
+		$this->add_responsive_control( 'dot_size', array( 'label' => esc_html__( 'Dot Size', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 4, 'max' => 30 ) ), 'default' => array( 'size' => 8, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination .swiper-pagination-bullet' => 'width:{{SIZE}}{{UNIT}};height:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'dot_gap', array( 'label' => esc_html__( 'Space Between Dots', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 30 ) ), 'default' => array( 'size' => 4, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination .swiper-pagination-bullet' => 'margin-inline:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'dot_color', array( 'label' => esc_html__( 'Dot Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#d6dce6', 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination .swiper-pagination-bullet' => 'background-color:{{VALUE}};' ) ) );
+		$this->add_control( 'dot_active_color', array( 'label' => esc_html__( 'Active Dot Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#3f5b92', 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination .swiper-pagination-bullet-active' => 'background-color:{{VALUE}};' ) ) );
+		$this->add_control( 'dot_radius', array( 'label' => esc_html__( 'Dot Border Radius', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 30 ), '%' => array( 'min' => 0, 'max' => 50 ) ), 'default' => array( 'size' => 50, 'unit' => '%' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination .swiper-pagination-bullet' => 'border-radius:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'pagination_spacing', array( 'label' => esc_html__( 'Pagination Spacing', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 100 ) ), 'default' => array( 'size' => 20, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination' => 'margin-top:{{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'pagination_position', array( 'label' => esc_html__( 'Pagination Position', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::CHOOSE, 'options' => array( 'start' => array( 'title' => esc_html__( 'Start', 'mim-product-categories' ), 'icon' => 'eicon-text-align-left' ), 'center' => array( 'title' => esc_html__( 'Center', 'mim-product-categories' ), 'icon' => 'eicon-text-align-center' ), 'end' => array( 'title' => esc_html__( 'End', 'mim-product-categories' ), 'icon' => 'eicon-text-align-right' ) ), 'default' => 'center', 'selectors' => array( '{{WRAPPER}} .mim-pc-pagination' => 'text-align:{{VALUE}};' ) ) );
+		$this->end_controls_section();
 	}
 
 	private function register_header_styles() {
@@ -214,8 +293,29 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$this->end_controls_section();
 	}
 
+	private function render_category_card( $category ) {
+		$link = get_term_link( $category );
+		if ( is_wp_error( $link ) ) {
+			return;
+		}
+		$settings     = $this->get_settings_for_display();
+		$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
+		$image        = $thumbnail_id ? wp_get_attachment_image( $thumbnail_id, 'woocommerce_thumbnail', false, array( 'class' => 'mim-pc-image', 'loading' => 'lazy' ) ) : wc_placeholder_img( 'woocommerce_thumbnail', array( 'class' => 'mim-pc-image' ) );
+		?>
+		<a class="mim-pc-card" href="<?php echo esc_url( $link ); ?>">
+			<span class="mim-pc-image-wrap"><?php echo wp_kses_post( $image ); ?></span>
+			<span class="mim-pc-name"><?php echo esc_html( $category->name ); ?></span>
+			<?php if ( 'yes' === $settings['show_count'] ) : ?><span class="mim-pc-count"><?php echo esc_html( number_format_i18n( $category->count ) . ' ' . sanitize_text_field( $settings['count_suffix'] ) ); ?></span><?php endif; ?>
+		</a>
+		<?php
+	}
+
 	protected function render() {
 		$settings = $this->get_settings_for_display();
+		$is_carousel = isset( $settings['layout_type'] ) && 'carousel' === $settings['layout_type'];
+		if ( $is_carousel ) {
+			wp_enqueue_script( 'mim-product-categories-carousel' );
+		}
 		$args = array(
 			'taxonomy' => 'product_cat',
 			'number' => max( 1, absint( $settings['number'] ) ),
@@ -242,7 +342,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			$this->add_link_attributes( 'link', $settings['link'] );
 		}
 		?>
-		<section class="mim-pc-wrap">
+		<section class="mim-pc-wrap<?php echo $is_carousel ? ' mim-pc-is-carousel' : ''; ?>">
 			<div class="mim-pc-header">
 				<div class="mim-pc-heading">
 					<?php if ( $settings['title'] ) : ?><h2 class="mim-pc-title"><?php echo esc_html( $settings['title'] ); ?></h2><?php endif; ?>
@@ -255,20 +355,41 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 					</a>
 				<?php endif; ?>
 			</div>
-			<div class="mim-pc-grid">
-				<?php foreach ( $categories as $category ) :
-					$link = get_term_link( $category );
-					if ( is_wp_error( $link ) ) { continue; }
-					$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
-					$image = $thumbnail_id ? wp_get_attachment_image( $thumbnail_id, 'woocommerce_thumbnail', false, array( 'class'=>'mim-pc-image', 'loading'=>'lazy' ) ) : wc_placeholder_img( 'woocommerce_thumbnail', array( 'class'=>'mim-pc-image' ) );
-					?>
-					<a class="mim-pc-card" href="<?php echo esc_url( $link ); ?>">
-						<span class="mim-pc-image-wrap"><?php echo wp_kses_post( $image ); ?></span>
-						<span class="mim-pc-name"><?php echo esc_html( $category->name ); ?></span>
-						<?php if ( 'yes' === $settings['show_count'] ) : ?><span class="mim-pc-count"><?php echo esc_html( number_format_i18n( $category->count ) . ' ' . $settings['count_suffix'] ); ?></span><?php endif; ?>
-					</a>
-				<?php endforeach; ?>
-			</div>
+			<?php if ( $is_carousel ) :
+				$mobile_breakpoint = max( 320, absint( $settings['mobile_breakpoint'] ) );
+				$tablet_breakpoint = max( $mobile_breakpoint + 1, absint( $settings['tablet_breakpoint'] ) );
+				$config = array(
+					'slidesPerView' => max( 1, absint( $settings['slides_visible'] ) ),
+					'slidesPerGroup' => max( 1, absint( $settings['slides_to_scroll'] ) ),
+					'spaceBetween' => isset( $settings['carousel_space']['size'] ) ? absint( $settings['carousel_space']['size'] ) : 16,
+					'speed' => max( 100, absint( $settings['carousel_speed'] ) ),
+					'loop' => 'yes' === $settings['infinite_loop'], 'centeredSlides' => 'yes' === $settings['center_mode'],
+					'allowTouchMove' => 'yes' === $settings['allow_drag'], 'simulateTouch' => 'yes' === $settings['allow_drag'],
+					'freeMode' => 'yes' === $settings['free_mode'], 'autoHeight' => 'yes' === $settings['auto_height'],
+					'autoplay' => 'yes' === $settings['autoplay'] ? array( 'delay' => max( 500, absint( $settings['autoplay_delay'] ) ), 'disableOnInteraction' => false, 'pauseOnMouseEnter' => 'yes' === $settings['pause_on_hover'] ) : false,
+					'breakpoints' => array(
+						0 => array( 'slidesPerView' => max( 1, absint( $settings['slides_visible_mobile'] ) ), 'spaceBetween' => isset( $settings['carousel_space_mobile']['size'] ) ? absint( $settings['carousel_space_mobile']['size'] ) : 16 ),
+						$mobile_breakpoint + 1 => array( 'slidesPerView' => max( 1, absint( $settings['slides_visible_tablet'] ) ), 'spaceBetween' => isset( $settings['carousel_space_tablet']['size'] ) ? absint( $settings['carousel_space_tablet']['size'] ) : 16 ),
+						$tablet_breakpoint + 1 => array( 'slidesPerView' => max( 1, absint( $settings['slides_visible'] ) ), 'spaceBetween' => isset( $settings['carousel_space']['size'] ) ? absint( $settings['carousel_space']['size'] ) : 16 ),
+					),
+				);
+				$direction = in_array( $settings['carousel_direction'], array( 'ltr', 'rtl' ), true ) ? $settings['carousel_direction'] : ( is_rtl() ? 'rtl' : 'ltr' );
+				?>
+				<div class="mim-pc-carousel-shell" dir="<?php echo esc_attr( $direction ); ?>">
+					<div class="mim-pc-carousel swiper" data-carousel-options="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
+						<div class="swiper-wrapper">
+							<?php foreach ( $categories as $category ) : ?><div class="swiper-slide"><?php $this->render_category_card( $category ); ?></div><?php endforeach; ?>
+						</div>
+					</div>
+					<?php if ( 'yes' === $settings['show_navigation'] ) : ?>
+						<button class="mim-pc-nav mim-pc-prev" type="button" aria-label="<?php echo esc_attr__( 'Previous categories', 'mim-product-categories' ); ?>"><?php \Elementor\Icons_Manager::render_icon( $settings['previous_icon'], array( 'aria-hidden' => 'true' ) ); ?></button>
+						<button class="mim-pc-nav mim-pc-next" type="button" aria-label="<?php echo esc_attr__( 'Next categories', 'mim-product-categories' ); ?>"><?php \Elementor\Icons_Manager::render_icon( $settings['next_icon'], array( 'aria-hidden' => 'true' ) ); ?></button>
+					<?php endif; ?>
+					<?php if ( 'yes' === $settings['show_pagination'] ) : ?><div class="mim-pc-pagination" aria-label="<?php echo esc_attr__( 'Carousel pagination', 'mim-product-categories' ); ?>"></div><?php endif; ?>
+				</div>
+			<?php else : ?>
+				<div class="mim-pc-grid"><?php foreach ( $categories as $category ) { $this->render_category_card( $category ); } ?></div>
+			<?php endif; ?>
 		</section>
 		<?php
 	}
