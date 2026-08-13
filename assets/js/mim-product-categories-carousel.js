@@ -33,15 +33,9 @@
 			options.watchOverflow = true;
 
 			if ( window.elementorFrontend && elementorFrontend.utils && elementorFrontend.utils.swiper ) {
-				var swiperInstance = new elementorFrontend.utils.swiper( carousel, options );
-
-				if ( swiperInstance && 'function' === typeof swiperInstance.then ) {
-					swiperInstance.then( function ( swiper ) {
-						carousel.mimPcSwiper = swiper;
-					} );
-				} else {
-					carousel.mimPcSwiper = swiperInstance;
-				}
+				new elementorFrontend.utils.swiper( carousel, options ).then( function ( swiper ) {
+					carousel.mimPcSwiper = swiper;
+				} );
 			}
 		} );
 	}

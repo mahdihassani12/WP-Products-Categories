@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, product categories, responsive
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 
 A responsive Elementor widget for displaying WooCommerce product categories.
@@ -27,9 +27,5 @@ A responsive Elementor widget for displaying WooCommerce product categories.
 * Customizable carousel arrow icons, buttons, positioning, and pagination dots.
 
 == Changelog ==
-= 1.1.1 =
-* Fixed Elementor editor preview loading by avoiding settings access during widget dependency discovery.
-* Improved compatibility with Elementor Swiper loaders that return either a Promise or an instance.
-
 = 1.1.0 =
 * Added an optional responsive carousel layout while preserving the existing grid layout.

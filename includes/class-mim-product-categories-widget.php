@@ -30,6 +30,14 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		return array( 'mim-product-categories' );
 	}
 
+	public function get_script_depends() {
+		$settings = $this->get_settings_for_display();
+
+		return isset( $settings['layout_type'] ) && 'carousel' === $settings['layout_type']
+			? array( 'mim-product-categories-carousel' )
+			: array();
+	}
+
 	private function get_product_category_options() {
 		$options = array();
 		$terms   = get_terms( array(
