@@ -31,11 +31,43 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	}
 
 	public function get_script_depends() {
-		$settings = $this->get_settings_for_display();
+		// Elementor can request dependencies before widget settings are hydrated in
+		// the editor. Declaring the registered handle is safe and avoids reading a
+		// null settings value during editor bootstrap.
+		return array( 'mim-product-categories-carousel' );
+	}
 
-		return isset( $settings['layout_type'] ) && 'carousel' === $settings['layout_type']
-			? array( 'mim-product-categories-carousel' )
-			: array();
+	/**
+	 * Return render settings with safe defaults for old and partially saved widgets.
+	 *
+	 * @return array
+	 */
+	private function get_safe_settings() {
+		$settings = $this->get_settings_for_display();
+		$defaults = array(
+			'layout_type' => 'grid', 'number' => 18, 'hide_empty' => 'yes',
+			'orderby' => 'name', 'order' => 'ASC', 'parent' => 'top',
+			'selected_categories' => array(), 'show_count' => 'yes', 'count_suffix' => __( 'items', 'mim-product-categories' ),
+			'title' => __( 'Featured Categories', 'mim-product-categories' ), 'subtitle' => '',
+			'link_text' => '', 'link' => array(), 'show_arrow' => 'yes', 'arrow' => array(),
+			'slides_visible' => 6, 'slides_visible_tablet' => 4, 'slides_visible_mobile' => 2,
+			'slides_to_scroll' => 1, 'carousel_space' => array( 'size' => 16 ),
+			'carousel_space_tablet' => array( 'size' => 16 ), 'carousel_space_mobile' => array( 'size' => 16 ),
+			'carousel_speed' => 500, 'autoplay' => '', 'autoplay_delay' => 3000,
+			'pause_on_hover' => 'yes', 'infinite_loop' => 'yes', 'center_mode' => '',
+			'allow_drag' => 'yes', 'free_mode' => '', 'auto_height' => '',
+			'show_navigation' => 'yes', 'show_pagination' => 'yes',
+			'carousel_direction' => 'default', 'mobile_breakpoint' => 767, 'tablet_breakpoint' => 1024,
+			'previous_icon' => array(), 'next_icon' => array(),
+		);
+
+		$settings         = wp_parse_args( is_array( $settings ) ? $settings : array(), $defaults );
+		$settings['link'] = is_array( $settings['link'] ) ? $settings['link'] : array();
+		foreach ( array( 'arrow', 'previous_icon', 'next_icon', 'carousel_space', 'carousel_space_tablet', 'carousel_space_mobile' ) as $array_setting ) {
+			$settings[ $array_setting ] = is_array( $settings[ $array_setting ] ) ? $settings[ $array_setting ] : $defaults[ $array_setting ];
+		}
+
+		return $settings;
 	}
 
 	private function get_product_category_options() {
@@ -301,12 +333,11 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$this->end_controls_section();
 	}
 
-	private function render_category_card( $category ) {
+	private function render_category_card( $category, $settings ) {
 		$link = get_term_link( $category );
 		if ( is_wp_error( $link ) ) {
 			return;
 		}
-		$settings     = $this->get_settings_for_display();
 		$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 		$image        = $thumbnail_id ? wp_get_attachment_image( $thumbnail_id, 'woocommerce_thumbnail', false, array( 'class' => 'mim-pc-image', 'loading' => 'lazy' ) ) : wc_placeholder_img( 'woocommerce_thumbnail', array( 'class' => 'mim-pc-image' ) );
 		?>
@@ -319,16 +350,15 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	}
 
 	protected function render() {
-		$settings = $this->get_settings_for_display();
-		$is_carousel = isset( $settings['layout_type'] ) && 'carousel' === $settings['layout_type'];
-		if ( $is_carousel ) {
-			wp_enqueue_script( 'mim-product-categories-carousel' );
-		}
-		$args = array(
+		$settings        = $this->get_safe_settings();
+		$is_carousel     = 'carousel' === $settings['layout_type'];
+		$allowed_orderby = array( 'name', 'count', 'id', 'menu_order' );
+		$orderby         = sanitize_key( $settings['orderby'] );
+		$args            = array(
 			'taxonomy' => 'product_cat',
 			'number' => max( 1, absint( $settings['number'] ) ),
 			'hide_empty' => 'yes' === $settings['hide_empty'],
-			'orderby' => sanitize_key( $settings['orderby'] ),
+			'orderby' => in_array( $orderby, $allowed_orderby, true ) ? $orderby : 'name',
 			'order' => 'DESC' === $settings['order'] ? 'DESC' : 'ASC',
 		);
 		$selected_categories = ! empty( $settings['selected_categories'] ) && is_array( $settings['selected_categories'] )
@@ -341,7 +371,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			$args['parent'] = 0;
 		}
 		$categories = get_terms( $args );
-		if ( is_wp_error( $categories ) ) {
+		if ( is_wp_error( $categories ) || ! is_array( $categories ) ) {
 			return;
 		}
 
@@ -359,7 +389,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 				<?php if ( $settings['link_text'] && ! empty( $settings['link']['url'] ) ) : ?>
 					<a <?php echo $this->get_render_attribute_string( 'link' ); ?>>
 						<span><?php echo esc_html( $settings['link_text'] ); ?></span>
-						<?php if ( 'yes' === $settings['show_arrow'] ) : ?><span class="mim-pc-arrow" aria-hidden="true"><?php \Elementor\Icons_Manager::render_icon( $settings['arrow'], array( 'aria-hidden' => 'true' ) ); ?></span><?php endif; ?>
+						<?php if ( 'yes' === $settings['show_arrow'] && ! empty( $settings['arrow']['value'] ) ) : ?><span class="mim-pc-arrow" aria-hidden="true"><?php \Elementor\Icons_Manager::render_icon( $settings['arrow'], array( 'aria-hidden' => 'true' ) ); ?></span><?php endif; ?>
 					</a>
 				<?php endif; ?>
 			</div>
@@ -386,17 +416,17 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 				<div class="mim-pc-carousel-shell" dir="<?php echo esc_attr( $direction ); ?>">
 					<div class="mim-pc-carousel swiper" data-carousel-options="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
 						<div class="swiper-wrapper">
-							<?php foreach ( $categories as $category ) : ?><div class="swiper-slide"><?php $this->render_category_card( $category ); ?></div><?php endforeach; ?>
+							<?php foreach ( $categories as $category ) : ?><div class="swiper-slide"><?php $this->render_category_card( $category, $settings ); ?></div><?php endforeach; ?>
 						</div>
 					</div>
 					<?php if ( 'yes' === $settings['show_navigation'] ) : ?>
-						<button class="mim-pc-nav mim-pc-prev" type="button" aria-label="<?php echo esc_attr__( 'Previous categories', 'mim-product-categories' ); ?>"><?php \Elementor\Icons_Manager::render_icon( $settings['previous_icon'], array( 'aria-hidden' => 'true' ) ); ?></button>
-						<button class="mim-pc-nav mim-pc-next" type="button" aria-label="<?php echo esc_attr__( 'Next categories', 'mim-product-categories' ); ?>"><?php \Elementor\Icons_Manager::render_icon( $settings['next_icon'], array( 'aria-hidden' => 'true' ) ); ?></button>
+						<button class="mim-pc-nav mim-pc-prev" type="button" aria-label="<?php echo esc_attr__( 'Previous categories', 'mim-product-categories' ); ?>"><?php if ( ! empty( $settings['previous_icon']['value'] ) ) { \Elementor\Icons_Manager::render_icon( $settings['previous_icon'], array( 'aria-hidden' => 'true' ) ); } ?></button>
+						<button class="mim-pc-nav mim-pc-next" type="button" aria-label="<?php echo esc_attr__( 'Next categories', 'mim-product-categories' ); ?>"><?php if ( ! empty( $settings['next_icon']['value'] ) ) { \Elementor\Icons_Manager::render_icon( $settings['next_icon'], array( 'aria-hidden' => 'true' ) ); } ?></button>
 					<?php endif; ?>
 					<?php if ( 'yes' === $settings['show_pagination'] ) : ?><div class="mim-pc-pagination" aria-label="<?php echo esc_attr__( 'Carousel pagination', 'mim-product-categories' ); ?>"></div><?php endif; ?>
 				</div>
 			<?php else : ?>
-				<div class="mim-pc-grid"><?php foreach ( $categories as $category ) { $this->render_category_card( $category ); } ?></div>
+				<div class="mim-pc-grid"><?php foreach ( $categories as $category ) { $this->render_category_card( $category, $settings ); } ?></div>
 			<?php endif; ?>
 		</section>
 		<?php
