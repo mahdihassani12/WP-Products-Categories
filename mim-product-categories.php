@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mim Product Categories
  * Description: A customizable responsive WooCommerce product categories widget for Elementor.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Mim
  * Text Domain: mim-product-categories
  * Requires Plugins: elementor, woocommerce
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MIM_PC_VERSION', '1.0.1' );
+define( 'MIM_PC_VERSION', '1.1.0' );
 define( 'MIM_PC_FILE', __FILE__ );
 define( 'MIM_PC_URL', plugin_dir_url( __FILE__ ) );
 
@@ -52,6 +52,14 @@ function mim_pc_register_assets() {
 		MIM_PC_URL . 'assets/css/mim-product-categories.css',
 		array(),
 		MIM_PC_VERSION
+	);
+
+	wp_register_script(
+		'mim-product-categories-carousel',
+		MIM_PC_URL . 'assets/js/mim-product-categories-carousel.js',
+		array( 'elementor-frontend' ),
+		MIM_PC_VERSION,
+		true
 	);
 }
 
