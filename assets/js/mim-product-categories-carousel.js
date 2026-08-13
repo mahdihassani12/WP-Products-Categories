@@ -7,6 +7,10 @@
 			var shell = carousel.closest( '.mim-pc-carousel-shell' );
 			var options;
 
+			if ( ! shell ) {
+				return;
+			}
+
 			if ( carousel.mimPcSwiper && 'function' === typeof carousel.mimPcSwiper.destroy ) {
 				carousel.mimPcSwiper.destroy( true, true );
 			}
@@ -32,8 +36,8 @@
 			options.keyboard = { enabled: true };
 			options.watchOverflow = true;
 
-			if ( window.elementorFrontend && elementorFrontend.utils && elementorFrontend.utils.swiper ) {
-				new elementorFrontend.utils.swiper( carousel, options ).then( function ( swiper ) {
+			if ( window.elementorFrontend && window.elementorFrontend.utils && window.elementorFrontend.utils.swiper ) {
+				Promise.resolve( new window.elementorFrontend.utils.swiper( carousel, options ) ).then( function ( swiper ) {
 					carousel.mimPcSwiper = swiper;
 				} );
 			}
@@ -41,6 +45,8 @@
 	}
 
 	$( window ).on( 'elementor/frontend/init', function () {
-		elementorFrontend.hooks.addAction( 'frontend/element_ready/mim-product-categories.default', initCarousel );
+		if ( window.elementorFrontend && window.elementorFrontend.hooks ) {
+			window.elementorFrontend.hooks.addAction( 'frontend/element_ready/mim-product-categories.default', initCarousel );
+		}
 	} );
 }( jQuery, window ) );
