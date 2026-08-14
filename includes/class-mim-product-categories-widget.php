@@ -48,8 +48,9 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'layout_type' => 'grid', 'number' => 18, 'hide_empty' => 'yes',
 			'orderby' => 'name', 'order' => 'ASC', 'parent' => 'top',
 			'selected_categories' => array(), 'show_count' => 'yes', 'count_suffix' => __( 'items', 'mim-product-categories' ),
-			'title' => __( 'Featured Categories', 'mim-product-categories' ), 'subtitle' => '',
+			'show_heading' => 'yes', 'title' => __( 'Featured Categories', 'mim-product-categories' ), 'subtitle' => '',
 			'link_text' => '', 'link' => array(), 'show_arrow' => 'yes', 'arrow' => array(),
+			'card_shape' => 'square',
 			'slides_visible' => 6, 'slides_visible_tablet' => 4, 'slides_visible_mobile' => 2,
 			'slides_to_scroll' => 1, 'carousel_space' => array( 'size' => 16 ),
 			'carousel_space_tablet' => array( 'size' => 16 ), 'carousel_space_mobile' => array( 'size' => 16 ),
@@ -93,28 +94,39 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	protected function register_controls() {
 		$this->start_controls_section( 'content_section', array( 'label' => esc_html__( 'Content', 'mim-product-categories' ) ) );
 
+		$this->add_control( 'show_heading', array(
+			'label' => esc_html__( 'Show Heading', 'mim-product-categories' ),
+			'type' => \Elementor\Controls_Manager::SWITCHER,
+			'label_on' => esc_html__( 'Show', 'mim-product-categories' ),
+			'label_off' => esc_html__( 'Hide', 'mim-product-categories' ),
+			'default' => 'yes',
+		) );
 		$this->add_control( 'title', array(
 			'label' => esc_html__( 'Title', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::TEXT,
 			'default' => esc_html__( 'Featured Categories', 'mim-product-categories' ),
 			'label_block' => true,
+			'condition' => array( 'show_heading' => 'yes' ),
 		) );
 		$this->add_control( 'subtitle', array(
 			'label' => esc_html__( 'Subtitle', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::TEXTAREA,
 			'default' => esc_html__( 'Choose your necessary products from these featured categories.', 'mim-product-categories' ),
 			'rows' => 2,
+			'condition' => array( 'show_heading' => 'yes' ),
 		) );
 		$this->add_control( 'link_text', array(
 			'label' => esc_html__( 'Link Text', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::TEXT,
 			'default' => esc_html__( 'View All Categories', 'mim-product-categories' ),
+			'condition' => array( 'show_heading' => 'yes' ),
 		) );
 		$this->add_control( 'link', array(
 			'label' => esc_html__( 'Link', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::URL,
 			'placeholder' => 'https://example.com/shop/',
 			'dynamic' => array( 'active' => true ),
+			'condition' => array( 'show_heading' => 'yes' ),
 		) );
 		$this->add_control( 'show_arrow', array(
 			'label' => esc_html__( 'Show Arrow', 'mim-product-categories' ),
@@ -122,12 +134,13 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'label_on' => esc_html__( 'Show', 'mim-product-categories' ),
 			'label_off' => esc_html__( 'Hide', 'mim-product-categories' ),
 			'default' => 'yes',
+			'condition' => array( 'show_heading' => 'yes' ),
 		) );
 		$this->add_control( 'arrow', array(
 			'label' => esc_html__( 'Arrow Icon', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::ICONS,
 			'default' => array( 'value' => 'fas fa-arrow-right', 'library' => 'fa-solid' ),
-			'condition' => array( 'show_arrow' => 'yes' ),
+			'condition' => array( 'show_heading' => 'yes', 'show_arrow' => 'yes' ),
 		) );
 		$this->end_controls_section();
 
@@ -320,6 +333,16 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 
 	private function register_card_styles() {
 		$this->start_controls_section( 'card_style', array( 'label' => esc_html__( 'Category Cards', 'mim-product-categories' ), 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
+		$this->add_control( 'card_shape', array(
+			'label' => esc_html__( 'Card Shape', 'mim-product-categories' ),
+			'type' => \Elementor\Controls_Manager::CHOOSE,
+			'options' => array(
+				'square' => array( 'title' => esc_html__( 'Square', 'mim-product-categories' ), 'icon' => 'eicon-square' ),
+				'circle' => array( 'title' => esc_html__( 'Circle', 'mim-product-categories' ), 'icon' => 'eicon-circle-o' ),
+			),
+			'default' => 'square',
+			'toggle' => false,
+		) );
 		$this->add_control( 'card_background', array( 'label' => esc_html__( 'Background', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'background-color: {{VALUE}};' ) ) );
 		$this->add_control( 'card_border_color', array( 'label' => esc_html__( 'Border Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#d6dce6', 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'border-color: {{VALUE}};' ) ) );
 		$this->add_control( 'card_hover_border', array( 'label' => esc_html__( 'Hover Border Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#3f5b92', 'selectors' => array( '{{WRAPPER}} .mim-pc-card:hover' => 'border-color: {{VALUE}};' ) ) );
@@ -341,7 +364,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 		$image        = $thumbnail_id ? wp_get_attachment_image( $thumbnail_id, 'woocommerce_thumbnail', false, array( 'class' => 'mim-pc-image', 'loading' => 'lazy' ) ) : wc_placeholder_img( 'woocommerce_thumbnail', array( 'class' => 'mim-pc-image' ) );
 		?>
-		<a class="mim-pc-card" href="<?php echo esc_url( $link ); ?>">
+		<a class="mim-pc-card<?php echo 'circle' === $settings['card_shape'] ? ' mim-pc-card--circle' : ''; ?>" href="<?php echo esc_url( $link ); ?>">
 			<span class="mim-pc-image-wrap"><?php echo wp_kses_post( $image ); ?></span>
 			<span class="mim-pc-name"><?php echo esc_html( $category->name ); ?></span>
 			<?php if ( 'yes' === $settings['show_count'] ) : ?><span class="mim-pc-count"><?php echo esc_html( number_format_i18n( $category->count ) . ' ' . sanitize_text_field( $settings['count_suffix'] ) ); ?></span><?php endif; ?>
@@ -352,6 +375,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	protected function render() {
 		$settings        = $this->get_safe_settings();
 		$is_carousel     = 'carousel' === $settings['layout_type'];
+		$show_header     = 'yes' === $settings['show_heading'] && ( $settings['title'] || $settings['subtitle'] || ( $settings['link_text'] && ! empty( $settings['link']['url'] ) ) );
 		$allowed_orderby = array( 'name', 'count', 'id', 'menu_order' );
 		$orderby         = sanitize_key( $settings['orderby'] );
 		$args            = array(
@@ -381,6 +405,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		}
 		?>
 		<section class="mim-pc-wrap<?php echo $is_carousel ? ' mim-pc-is-carousel' : ''; ?>">
+			<?php if ( $show_header ) : ?>
 			<div class="mim-pc-header">
 				<div class="mim-pc-heading">
 					<?php if ( $settings['title'] ) : ?><h2 class="mim-pc-title"><?php echo esc_html( $settings['title'] ); ?></h2><?php endif; ?>
@@ -393,6 +418,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 					</a>
 				<?php endif; ?>
 			</div>
+			<?php endif; ?>
 			<?php if ( $is_carousel ) :
 				$mobile_breakpoint = max( 320, absint( $settings['mobile_breakpoint'] ) );
 				$tablet_breakpoint = max( $mobile_breakpoint + 1, absint( $settings['tablet_breakpoint'] ) );
