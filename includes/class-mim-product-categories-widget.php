@@ -45,7 +45,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	private function get_safe_settings() {
 		$settings = $this->get_settings_for_display();
 		$defaults = array(
-			'layout_type' => 'grid', 'number' => 18, 'hide_empty' => 'yes',
+			'layout_type' => 'grid', 'number' => '', 'hide_empty' => 'yes',
 			'orderby' => 'name', 'order' => 'ASC', 'parent' => 'top',
 			'selected_categories' => array(), 'show_count' => 'yes', 'count_suffix' => __( 'items', 'mim-product-categories' ),
 			'show_heading' => 'yes', 'title' => __( 'Featured Categories', 'mim-product-categories' ), 'subtitle' => '',
@@ -158,9 +158,11 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$this->add_control( 'number', array(
 			'label' => esc_html__( 'Number of Categories', 'mim-product-categories' ),
 			'type' => \Elementor\Controls_Manager::NUMBER,
-			'default' => 18,
+			'default' => '',
 			'min' => 1,
 			'max' => 100,
+			'placeholder' => esc_html__( 'All', 'mim-product-categories' ),
+			'description' => esc_html__( 'Leave empty to allow all matching categories.', 'mim-product-categories' ),
 		) );
 		$this->add_control( 'parent', array(
 			'label' => esc_html__( 'Category Level', 'mim-product-categories' ),
@@ -433,14 +435,15 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 	}
 
 	protected function render() {
-		$settings        = $this->get_safe_settings();
-		$is_carousel     = 'carousel' === $settings['layout_type'];
-		$show_header     = 'yes' === $settings['show_heading'] && ( $settings['title'] || $settings['subtitle'] || ( $settings['link_text'] && ! empty( $settings['link']['url'] ) ) );
-		$allowed_orderby = array( 'name', 'count', 'id', 'menu_order' );
-		$orderby         = sanitize_key( $settings['orderby'] );
-		$args            = array(
+		$settings          = $this->get_safe_settings();
+		$is_carousel       = 'carousel' === $settings['layout_type'];
+		$is_grid_paginated = ! $is_carousel && 'yes' === $settings['grid_pagination'];
+		$show_header       = 'yes' === $settings['show_heading'] && ( $settings['title'] || $settings['subtitle'] || ( $settings['link_text'] && ! empty( $settings['link']['url'] ) ) );
+		$allowed_orderby   = array( 'name', 'count', 'id', 'menu_order' );
+		$orderby           = sanitize_key( $settings['orderby'] );
+		$category_limit    = '' === trim( (string) $settings['number'] ) ? 0 : absint( $settings['number'] );
+		$args              = array(
 			'taxonomy' => 'product_cat',
-			'number' => max( 1, absint( $settings['number'] ) ),
 			'hide_empty' => 'yes' === $settings['hide_empty'],
 			'orderby' => in_array( $orderby, $allowed_orderby, true ) ? $orderby : 'name',
 			'order' => 'DESC' === $settings['order'] ? 'DESC' : 'ASC',
@@ -454,21 +457,37 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		} elseif ( 'top' === $settings['parent'] ) {
 			$args['parent'] = 0;
 		}
-		$categories = get_terms( $args );
-		if ( is_wp_error( $categories ) || ! is_array( $categories ) ) {
-			return;
-		}
 
 		$grid_page = 1;
 		$total_grid_pages = 1;
 		$grid_page_key = 'mim_pc_page_' . sanitize_key( $this->get_id() );
-		if ( ! $is_carousel && 'yes' === $settings['grid_pagination'] ) {
+		if ( $is_grid_paginated ) {
 			$per_page = max( 1, absint( $settings['categories_per_page'] ) );
-			$total_grid_pages = (int) ceil( count( $categories ) / $per_page );
+			$count_args = $args;
+			unset( $count_args['taxonomy'], $count_args['orderby'], $count_args['order'] );
+			$total_categories = wp_count_terms( 'product_cat', $count_args );
+			if ( is_wp_error( $total_categories ) ) {
+				return;
+			}
+			$total_categories = (int) $total_categories;
+			if ( $category_limit ) {
+				$total_categories = min( $total_categories, $category_limit );
+			}
+			$total_grid_pages = (int) ceil( $total_categories / $per_page );
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public, read-only pagination state.
 			$requested_page = isset( $_GET[ $grid_page_key ] ) ? absint( wp_unslash( $_GET[ $grid_page_key ] ) ) : 1;
 			$grid_page = min( max( 1, $requested_page ), max( 1, $total_grid_pages ) );
-			$categories = array_slice( $categories, ( $grid_page - 1 ) * $per_page, $per_page );
+			$args['offset'] = ( $grid_page - 1 ) * $per_page;
+			$args['number'] = $category_limit
+				? min( $per_page, max( 0, $category_limit - $args['offset'] ) )
+				: $per_page;
+		} elseif ( $category_limit ) {
+			$args['number'] = $category_limit;
+		}
+
+		$categories = get_terms( $args );
+		if ( is_wp_error( $categories ) || ! is_array( $categories ) ) {
+			return;
 		}
 
 		$this->add_render_attribute( 'link', 'class', 'mim-pc-all-link' );
