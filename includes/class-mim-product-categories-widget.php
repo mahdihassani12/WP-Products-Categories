@@ -50,7 +50,6 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 			'selected_categories' => array(), 'show_count' => 'yes', 'count_suffix' => __( 'items', 'mim-product-categories' ),
 			'show_heading' => 'yes', 'title' => __( 'Featured Categories', 'mim-product-categories' ), 'subtitle' => '',
 			'link_text' => '', 'link' => array(), 'show_arrow' => 'yes', 'arrow' => array(),
-			'card_shape' => 'square',
 			'grid_pagination' => '', 'categories_per_page' => 15,
 			'show_image' => 'yes', 'show_image_tablet' => 'yes', 'show_image_mobile' => 'yes',
 			'slides_visible' => 6, 'slides_visible_tablet' => 4, 'slides_visible_mobile' => 2,
@@ -367,22 +366,12 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 
 	private function register_card_styles() {
 		$this->start_controls_section( 'card_style', array( 'label' => esc_html__( 'Category Cards', 'mim-product-categories' ), 'tab' => \Elementor\Controls_Manager::TAB_STYLE ) );
-		$this->add_control( 'card_shape', array(
-			'label' => esc_html__( 'Card Shape', 'mim-product-categories' ),
-			'type' => \Elementor\Controls_Manager::CHOOSE,
-			'options' => array(
-				'square' => array( 'title' => esc_html__( 'Square', 'mim-product-categories' ), 'icon' => 'eicon-square' ),
-				'circle' => array( 'title' => esc_html__( 'Circle', 'mim-product-categories' ), 'icon' => 'eicon-circle-o' ),
-			),
-			'default' => 'square',
-			'toggle' => false,
-		) );
 		$this->add_control( 'card_background', array( 'label' => esc_html__( 'Background', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'background-color: {{VALUE}};' ) ) );
 		$this->add_control( 'card_border_color', array( 'label' => esc_html__( 'Border Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#d6dce6', 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'border-color: {{VALUE}};' ) ) );
 		$this->add_control( 'card_hover_border', array( 'label' => esc_html__( 'Hover Border Color', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::COLOR, 'default' => '#3f5b92', 'selectors' => array( '{{WRAPPER}} .mim-pc-card:hover' => 'border-color: {{VALUE}};' ) ) );
 		$this->add_responsive_control( 'card_padding', array( 'label' => esc_html__( 'Padding', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'default' => array( 'top'=>12, 'right'=>8, 'bottom'=>12, 'left'=>8, 'unit'=>'px', 'isLinked'=>false ), 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_control( 'card_radius', array( 'label' => esc_html__( 'Border Radius', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', '%' ), 'default' => array( 'top'=>4, 'right'=>4, 'bottom'=>4, 'left'=>4, 'unit'=>'px', 'isLinked'=>true ), 'selectors' => array( '{{WRAPPER}} .mim-pc-card' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'image_size', array( 'label' => esc_html__( 'Image Size', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min'=>30, 'max'=>200 ) ), 'default' => array( 'size'=>78, 'unit'=>'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-image-wrap' => 'height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .mim-pc-image' => 'max-height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'image_size', array( 'label' => esc_html__( 'Image Size', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min'=>30, 'max'=>200 ) ), 'default' => array( 'size'=>78, 'unit'=>'px' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-image-wrap' => 'height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .mim-pc-is-carousel .mim-pc-image-wrap' => 'width: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .mim-pc-image' => 'max-height: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'show_image', array( 'label' => esc_html__( 'Show Image', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SWITCHER, 'default' => 'yes', 'desktop_default' => 'yes', 'tablet_default' => 'yes', 'mobile_default' => 'yes', 'selectors_dictionary' => array( 'yes' => 'flex', '' => 'none' ), 'selectors' => array( '{{WRAPPER}} .mim-pc-image-wrap' => 'display:{{VALUE}};' ) ) );
 		$this->add_responsive_control( 'image_width', array( 'label' => esc_html__( 'Image Width', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', '%', 'vw' ), 'range' => array( 'px' => array( 'min' => 1, 'max' => 500 ), '%' => array( 'min' => 1, 'max' => 100 ) ), 'selectors' => array( '{{WRAPPER}} .mim-pc-image' => 'width:{{SIZE}}{{UNIT}}!important;' ) ) );
 		$this->add_responsive_control( 'image_height', array( 'label' => esc_html__( 'Image Height', 'mim-product-categories' ), 'type' => \Elementor\Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vw' ), 'range' => array( 'px' => array( 'min' => 1, 'max' => 500 ) ), 'selectors' => array( '{{WRAPPER}} .mim-pc-image-wrap' => 'height:{{SIZE}}{{UNIT}};', '{{WRAPPER}} .mim-pc-image' => 'height:{{SIZE}}{{UNIT}};max-height:none;' ) ) );
@@ -406,7 +395,7 @@ class Mim_Product_Categories_Widget extends \Elementor\Widget_Base {
 		$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
 		$image        = $thumbnail_id ? wp_get_attachment_image( $thumbnail_id, 'woocommerce_thumbnail', false, array( 'class' => 'mim-pc-image', 'loading' => 'lazy' ) ) : wc_placeholder_img( 'woocommerce_thumbnail', array( 'class' => 'mim-pc-image' ) );
 		?>
-		<a class="mim-pc-card<?php echo 'circle' === $settings['card_shape'] ? ' mim-pc-card--circle' : ''; ?>" href="<?php echo esc_url( $link ); ?>">
+		<a class="mim-pc-card" href="<?php echo esc_url( $link ); ?>">
 			<span class="mim-pc-image-wrap"><?php echo wp_kses_post( $image ); ?></span>
 			<span class="mim-pc-name"><?php echo esc_html( $category->name ); ?></span>
 			<?php if ( 'yes' === $settings['show_count'] ) : ?><span class="mim-pc-count"><?php echo esc_html( number_format_i18n( $category->count ) . ' ' . sanitize_text_field( $settings['count_suffix'] ) ); ?></span><?php endif; ?>
