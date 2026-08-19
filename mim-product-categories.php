@@ -41,12 +41,18 @@ function mim_pc_boot() {
 	}
 
 	add_action( 'wp_enqueue_scripts', 'mim_pc_register_assets' );
-	add_action( 'elementor/frontend/after_register_styles', 'mim_pc_register_assets' );
+	add_action( 'elementor/frontend/after_register_styles', 'mim_pc_register_style' );
+	add_action( 'elementor/frontend/after_register_scripts', 'mim_pc_register_script' );
 	add_action( 'elementor/widgets/register', 'mim_pc_register_widget' );
 }
 add_action( 'plugins_loaded', 'mim_pc_boot' );
 
 function mim_pc_register_assets() {
+	mim_pc_register_style();
+	mim_pc_register_script();
+}
+
+function mim_pc_register_style() {
 	wp_register_style(
 		'mim-product-categories',
 		MIM_PC_URL . 'assets/css/mim-product-categories.css',
@@ -54,6 +60,16 @@ function mim_pc_register_assets() {
 		MIM_PC_VERSION
 	);
 
+	wp_register_script(
+		'mim-product-categories-carousel',
+		MIM_PC_URL . 'assets/js/mim-product-categories-carousel.js',
+		array( 'elementor-frontend' ),
+		MIM_PC_VERSION,
+		true
+	);
+}
+
+function mim_pc_register_script() {
 	wp_register_script(
 		'mim-product-categories-carousel',
 		MIM_PC_URL . 'assets/js/mim-product-categories-carousel.js',
