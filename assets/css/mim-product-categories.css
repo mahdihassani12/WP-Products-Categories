@@ -141,6 +141,7 @@
   height: 100%;
 }
 .mim-pc-wrap.mim-pc-is-carousel .mim-pc-card {
+  width: 100%;
   border: 0 !important;
   background: transparent !important;
   padding: 0 !important;
@@ -158,9 +159,13 @@
   background: #f0f0f0;
 }
 .mim-pc-wrap.mim-pc-is-carousel .mim-pc-image {
+  display: block;
   width: 100% !important;
   height: 100% !important;
-  max-height: none;
+  max-width: 100% !important;
+  max-height: none !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 50% !important;
   object-fit: contain;
 }
 .mim-pc-wrap.mim-pc-is-carousel .mim-pc-name {
